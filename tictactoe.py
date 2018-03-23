@@ -108,7 +108,8 @@ class Policy(nn.Module):
         self.features = nn.Sequential(
             nn.Linear(input_size, hidden_size),
             nn.Relu(inplace=True),
-            nn.Linear(hidden_size, output_size)
+            nn.Linear(hidden_size, output_size),
+            nn.Softmax()
         )
 
     def forward(self, x):
