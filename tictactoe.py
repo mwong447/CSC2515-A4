@@ -107,7 +107,7 @@ class Policy(nn.Module):
         # TODO
         self.features = nn.Sequential(
             nn.Linear(input_size, hidden_size),
-            nn.Relu(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Linear(hidden_size, output_size),
             nn.Softmax()
         )
@@ -143,6 +143,22 @@ def compute_returns(rewards, gamma=1.0):
     [-2.5965000000000003, -2.8850000000000002, -2.6500000000000004, -8.5, -10.0]
     """
     # TODO
+
+    returns = []
+    for index, reward in enumerate(rewards):
+        i = index
+        exponent = 1
+        if i == len(rewards)-1:
+            returns.append(reward)
+        else:
+            while i < len(rewards)-1:
+                reward += (gamma**exponent)*(rewards[i+1])
+                exponent += 1
+                i += 1
+            returns.append(reward)
+    return returns
+
+
 
 def finish_episode(saved_rewards, saved_logprobs, gamma=1.0):
     """Samples an action from the policy at the state."""

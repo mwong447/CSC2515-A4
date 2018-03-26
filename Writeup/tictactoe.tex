@@ -278,6 +278,24 @@ class Policy(nn.Module):
 
 \begin{enumerate}[label=(\Alph*)]
 \item The implementation for the \textit{compute\_returns} function is located below.
+\begin{lstlisting}
+def compute_returns(rewards, gamma=1.0):
+    returns = []
+    for index, reward in enumerate(rewards):
+        i = index
+        exponent = 1
+        if i == len(rewards)-1:
+            returns.append(reward)
+        else:
+            while i < len(rewards)-1:
+                reward += (gamma**exponent)*(rewards[i+1])
+                exponent += 1
+                i += 1
+            returns.append(reward)
+    return returns
+
+\end{lstlisting}
+
 \item 
 \end{enumerate}
 \end{homeworkProblem}
