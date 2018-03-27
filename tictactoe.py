@@ -179,9 +179,9 @@ def finish_episode(saved_rewards, saved_logprobs, gamma=1.0):
 def get_reward(status):
     """Returns a numeric given an environment status."""
     return {
-            Environment.STATUS_VALID_MOVE  : 0.5, # TODO
-            Environment.STATUS_INVALID_MOVE: -10,
-            Environment.STATUS_WIN         : 1,
+            Environment.STATUS_VALID_MOVE  : 1, # TODO
+            Environment.STATUS_INVALID_MOVE: -5,
+            Environment.STATUS_WIN         : 10,
             Environment.STATUS_TIE         : 0,
             Environment.STATUS_LOSE        : -1
     }[status]
@@ -253,5 +253,34 @@ if __name__ == '__main__':
         # using weight checkpoint at episode int(<ep>)
         ep = int(sys.argv[1])
         load_weights(policy, ep)
-        print(first_move_distr(policy, env))
+        # print(first_move_distr(policy, env))
+
+        numGames = 0
+        numWon = 0
+        numLose = 0
+        numTie = 0
+        numInvalid = 0
+        while numGames < 100:
+            state = env.reset()
+            while env.done != True:
+                action, logprob = select_action(policy, state)
+                state, status, done = env.play_against_random(action)
+                if status == env.STATUS_INVALID_MOVE:
+                    numInvalid += 1
+            if status == env.STATUS_WIN:
+                numWon += 1
+            if status == env.STATUS_TIE:
+                numTie += 1
+            if status == env.STATUS_LOSE:
+                numLose += 1
+
+            numGames += 1
+        print("Number of games won: " + str(numWon))
+        print("Number of games tied: " + str(numTie))
+        print("Number of games lost: " + str(numLose))
+        print("Number of invalid moves: " + str(numInvalid))
+
+
+
+
 
