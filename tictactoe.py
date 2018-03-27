@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os
 from collections import defaultdict
 from itertools import count
 import numpy as np
@@ -109,12 +110,12 @@ class Policy(nn.Module):
             nn.Linear(input_size, hidden_size),
             nn.ReLU(inplace=True),
             nn.Linear(hidden_size, output_size),
-            nn.Softmax()
         )
 
     def forward(self, x):
         x = self.features(x)
-        return x
+        output = torch.nn.functional.softmax(x, dim=1)
+        return output
 
 def select_action(policy, state):
     """Samples an action from the policy at the state."""
@@ -178,11 +179,11 @@ def finish_episode(saved_rewards, saved_logprobs, gamma=1.0):
 def get_reward(status):
     """Returns a numeric given an environment status."""
     return {
-            Environment.STATUS_VALID_MOVE  : 0, # TODO
-            Environment.STATUS_INVALID_MOVE: 0,
-            Environment.STATUS_WIN         : 0,
+            Environment.STATUS_VALID_MOVE  : 0.5, # TODO
+            Environment.STATUS_INVALID_MOVE: -10,
+            Environment.STATUS_WIN         : 1,
             Environment.STATUS_TIE         : 0,
-            Environment.STATUS_LOSE        : 0
+            Environment.STATUS_LOSE        : -1
     }[status]
 
 def train(policy, env, gamma=1.0, log_interval=1000):
@@ -216,8 +217,7 @@ def train(policy, env, gamma=1.0, log_interval=1000):
             running_reward = 0
 
         if i_episode % (log_interval) == 0:
-            torch.save(policy.state_dict(),
-                       "ttt/policy-%d.pkl" % i_episode)
+            torch.save(policy.state_dict(), "./policy-%d.pt" % i_episode)
 
         if i_episode % 1 == 0: # batch_size
             optimizer.step()
@@ -236,7 +236,7 @@ def first_move_distr(policy, env):
 
 def load_weights(policy, episode):
     """Load saved weights"""
-    weights = torch.load("ttt/policy-%d.pkl" % episode)
+    weights = torch.load("./policy-%d.pt" % episode)
     policy.load_state_dict(weights)
 
 
@@ -250,7 +250,8 @@ if __name__ == '__main__':
         train(policy, env)
     else:
         # `python tictactoe.py <ep>` to print the first move distribution
-        # using weightt checkpoint at episode int(<ep>)
+        # using weight checkpoint at episode int(<ep>)
         ep = int(sys.argv[1])
         load_weights(policy, ep)
         print(first_move_distr(policy, env))
+
