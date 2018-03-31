@@ -227,11 +227,38 @@ This submissions containts the required files:  \textit{digits.py, faces.py, dee
 
 \begin{homeworkProblem}
 
-\noindent \textit{Environment}
+\noindent \textit{Environment Description}
 
-TO DO 
+The \textit{Environment} class provides a framework for the Tic-Tac-Toe layout.  The grid is represented by a $3 \times 3$ numpy array.  The attributes \textit{turn} and \textit{done} represent whose turn it is during the game (e.g. Player 1 vs. Player 2) and whether or not the game has finished, respectively.  The \textit{step()} function provides a method for a user/agent to input a move into the gameboard, taking in \textit{action} as it's parameter (e.g. where to place an X/O on the board, represented by a number from 0-9).  The \textit{render()} method shows the current state of the board.  The following code was written to test both functions:
 
+\begin{lstlisting}
+if __name__ == '__main__':
+    import sys
+    policy = Policy()
+    env = Environment()
+    if len(sys.argv) == 1:
+        # `python tictactoe.py` to train the agent
+        train(policy, env)
+    else:
+        # `python tictactoe.py <ep>` to print the first move distribution
+        # using weight checkpoint at episode int(<ep>)
+        #ep = int(sys.argv[1])
+        #load_weights(policy, ep)
+        # print(first_move_distr(policy, env))
+        print(env.step(action=4))
+        print(env.step(action=1))
+        print(env.render())
 
+\end{lstlisting}
+
+The following output was obtained from the execution of the above code.
+\begin{lstlisting}
+(array([0, 0, 0, 0, 1, 0, 0, 0, 0]), 'valid', False)
+(array([0, 2, 0, 0, 1, 0, 0, 0, 0]), 'valid', False)
+.o.
+.x.
+...
+\end{lstlisting}
 
 \end{homeworkProblem}
 \clearpage
@@ -253,15 +280,19 @@ class Policy(nn.Module):
         # TODO
         self.features = nn.Sequential(
             nn.Linear(input_size, hidden_size),
-            nn.Relu(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Linear(hidden_size, output_size)
-            nn.Softmax()
         )
 
     def forward(self, x):
         x = self.features(x)
-        return x
+        output = torch.nn.functional.softmax(x, dim=1)
+        return output
 \end{lstlisting}
+
+\item For a given position on the board, the select\_action function will return the probabilities that the agent should take with respect to the available moves - in this case, either X, O or no action.  As there are 9 total positions on the board, therefore, there are $3x3x3 = 27$ total vector dimensions (e.g. 3 moves per position $\times$ 3 positions per row $\times$ 3 rows per board).
+
+\item The value in each of the 9-output dimensions refer to the probabilities of the action that the agent will take - that is to say, the agent will pick the action status based on the highest value obtained from the neural network.  The policy is stochastic as the agent will pick a move based on the current state of the board.
 \end{enumerate}
 \end{homeworkProblem}
 
@@ -305,13 +336,24 @@ def compute_returns(rewards, gamma=1.0):
 %----------------------------------------------------------------------------------------
 
 \begin{homeworkProblem}
-\noindent \textit{Gradient Descent Training}
-
-TO DO
+\noindent \textit{Rewards}
 
 \begin{enumerate}[label=(\Alph*)]
-\item 
-\item
+\item The \textit{get\_reward} function was modified to the following:
+\begin{lstlisting}
+def get_reward(status):
+    """Returns a numeric given an environment status."""
+    return {
+            Environment.STATUS_VALID_MOVE  : 0, # TODO
+            Environment.STATUS_INVALID_MOVE: -100,
+            Environment.STATUS_WIN         : 10,
+            Environment.STATUS_TIE         : 0,
+            Environment.STATUS_LOSE        : 0
+    }[status]
+
+\end{lstlisting}
+
+\item The intention behind our choices was to significantly penalize making an invalid move so that the agent learned to stop making invalid moves earlier and consider only valid moves.  The only positive reward that was implemented was for winning a match.  Each of the other statuses had a zero reward.  The intuition here was to not penalize the agent for playing a move that was valid, but also, not penalize the agent for playing moves that resulted in ties or losses, only rewarding the agent for winning moves.
 \end{enumerate}
 
 \end{homeworkProblem}
@@ -325,10 +367,44 @@ TO DO
 \noindent \textit{Training}
 
 \begin{enumerate}[label=(\Alph*)]
-\item 
-\item
-\item
-\item 
+\item The learning curve for the agent is shown in the following figure.  The number of neurons in the hidden layer was modified to 18 instead of the default 64 from the starter code.
+ \begin{center}
+\begin{figure}[!ht]\centering
+\includegraphics[scale=0.75]{part5.png}
+\caption{Learning curve - average return vs. episode number}
+\end{figure}
+\end{center}
+\item  The effect of number of units in the hiddle layer vs. performance of the agent was measured by both increasing and decreasing the number of units and measuring the win rate of the trained agent at 100,000 episodes.
+\item  Based on the choice of rewards and number of units in the hidden layer, we observed that agent stopped playing invalid moves at approximately episode 25000.  To obtain this answer, we fetched the environment status every time an agent played an invalid move and incremented the total number of invalid moves by 1.  The total numnber of invalid moves was then output to the console.
+\item After running the agent for 100000 episodes, we were able to obtain a win rate of approximately 80-85\% (the reason for a range was due to the fact that an issue with seeding any random functionality was not resolved in time for this report).  The loss rate fluctuated between 15-20\% and the tie rate was the remaining percentage of games played.  The following output displays the first 5 games played by our agent, given a set of policy weights:
+\begin{lstlisting}
+# Game 1
+xo.
+ox.
+..x
+====
+# Game 2
+x..
+.x.
+oox
+====
+# Game 3
+xo.
+.x.
+o.x
+====
+# Game 4
+x.x
+oxo
+o.x
+====
+# Game 5
+xo.
+.xo
+..x
+====
+
+\end{lstlisting}
 \end{enumerate}
 
 
@@ -342,7 +418,15 @@ TO DO
 \begin{homeworkProblem}
 \noindent \textit{Win Rate over Episodes}
 
-TO DO
+The following graph outlines the win, lose, and tie rates for the agent vs. episode.
+
+\begin{figure}[!ht]\centering
+\includegraphics[scale=0.75]{part6.png}
+\caption{Win/Lose/Tie rates vs. episode}
+\end{figure}
+
+Given that a random agent playing the game results in a win rate of approximately 60\%, it appears that the agent is learning effectively enough to net a win rate that is higher than if a random agent was playing the game.  The three lines in the figure however, are quite noisy (e.g. they do not follow a smooth pattern), perhaps indicating that the hyperparameters could be tuned some more.
+
 
 \end{homeworkProblem}
 \clearpage
@@ -352,8 +436,18 @@ TO DO
 \begin{homeworkProblem}
 \noindent \textit{First Move Distribution Over Episodes}
 
-TO DO
+For the final trained model, execution of the first\_move\_distr function resulted in the following output:
+\begin{lstlisting}
+Columns 0 to 5 
+ 6.1930e-01  2.8002e-05  3.5696e-03  1.7899e-05  1.6235e-01  2.8408e-05
 
+Columns 6 to 8 
+ 1.7460e-04  4.4822e-06  2.1453e-01
+[torch.FloatTensor of size 1x9]
+
+\end{lstlisting}
+
+This output indicates that the agent has a high likelihood of playing first in either the centre of the board or in the bottom right corner
 
 \end{homeworkProblem}
 \clearpage
