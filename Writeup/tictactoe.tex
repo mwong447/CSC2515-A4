@@ -299,7 +299,7 @@ class Policy(nn.Module):
 
 \item For a given position on the board, the select\_action function will return the probabilities that the agent should take with respect to the available moves - in this case, either X, O or no action.  As there are 9 total positions on the board, therefore, there are $3x3x3 = 27$ total vector dimensions (e.g. 3 moves per position $\times$ 3 positions per row $\times$ 3 rows per board).
 
-\item The values in each of the 9-output dimensions refer to the probabilities of the action that the agent will take -  the agent will pick the action status based on the highest value obtained from the neural network.  The policy is stochastic as the agent will pick a move based on the current state of the board.
+\item Each value in the 9 dimensional output is a probability value representing the best action to take on the board (e.g. $3\times3$ actions) - i.e. the higher the number, the higher the probability of that action being the best action.  This policy is stochastic as it outputs a probability distribution of the best moves based on the current status of the board and not deterministic (e.g. there is no one best move for the current board status).
 \end{enumerate}
 \end{homeworkProblem}
 
@@ -517,18 +517,35 @@ Given that a random agent playing the game results in a win rate of approximatel
 \begin{homeworkProblem}
 \noindent \textit{First Move Distribution Over Episodes}
 
-For the final trained model, execution of the first\_move\_distr function resulted in the following output:
+The first move distribution earlier in the training process at 5000 episodes was as follows:
+\begin{lstlisting}
+ 0.1057  0.0288  0.1239  0.0201  0.1903  0.0298  0.0295  0.0178  0.4542
+[torch.FloatTensor of size 1x9]
+\end{lstlisting}
+
+Similarly, at 50000 episodes:
 \begin{lstlisting}
 Columns 0 to 5 
- 6.1930e-01  2.8002e-05  3.5696e-03  1.7899e-05  1.6235e-01  2.8408e-05
+ 2.1984e-03  3.3832e-06  2.3268e-02  1.0383e-05  2.6650e-02  3.1879e-05
 
 Columns 6 to 8 
- 1.7460e-04  4.4822e-06  2.1453e-01
+ 1.6433e-03  2.6558e-05  9.4617e-01
+[torch.FloatTensor of size 1x9]
+\end{lstlisting}
+
+For the final trained model:
+\begin{lstlisting}
+Columns 0 to 5 
+ 2.6256e-03  2.1233e-07  1.4166e-03  7.9190e-07  2.9096e-03  2.9352e-06
+
+Columns 6 to 8 
+ 2.4797e-03  2.8529e-06  9.9056e-01
 [torch.FloatTensor of size 1x9]
 
 \end{lstlisting}
 
-This output indicates that the agent has a high likelihood of playing first in either the centre of the board or in the bottom right corner
+The output of the last function call indicates that the agent has learned that playing in the corner position is the best possible move, as evidenced from the 0.99056 value in Column 8.  Earlier in the training process, we observe that the policy is learning which position to play first and already at 5000 episodes, the bottom right hand corner is already selected as the optimal first move.
+
 
 \end{homeworkProblem}
 \clearpage
@@ -538,7 +555,14 @@ This output indicates that the agent has a high likelihood of playing first in e
 \begin{homeworkProblem}
 \noindent \textit{Limitations}
 
-TO DO
+As discussed in Part 7, the trained agent is most likely to play first in the bottom right corner of the board.  The main limitation of the trained agent is that while it correctly learned the optimal first position in the game, it loses against a random policy.  Theoretically, the worst outcome for an optimal first move in this game (e.g. one of the corner positions) is a tie.  The agent appear to play moves that would result in a loss, such as in the following example:
+\begin{lstlisting}
+x.x
+ooo
+xox
+\end{lstlisting}
+
+This example illustrates that the first move carried out by the agent was in the bottom right corner, yet still lost against a random player.
 
 
 \end{homeworkProblem}

@@ -104,7 +104,7 @@ class Policy(nn.Module):
     """
     The Tic-Tac-Toe Policy
     """
-    def __init__(self, input_size=27, hidden_size=18, output_size=9):
+    def __init__(self, input_size=27, hidden_size=9, output_size=9):
         super(Policy, self).__init__()
         # TODO
         self.features = nn.Sequential(
