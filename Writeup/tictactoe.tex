@@ -39,6 +39,7 @@
 \usepackage{amsmath}
 \usepackage{enumerate}
 \usepackage{soul}
+\usepackage[justification=centering]{caption}
 %Code for including Python code in Latex - outlined on the Piazza forum post, taken from Stackoverflow
 
 \usepackage{enumitem}
@@ -213,8 +214,7 @@
 
 \noindent \textit{Introductory information and readme instructions}
 
-This submissions containts the required files:  \textit{digits.py, faces.py, deepfaces.py, deepnn.tex  \& faces.pdf} in addition to two folders - both containing an previously downloaded pictures for each actor/actress. The downloading code can be found in the source files.  Comments about the code are located in each of the source files. Code was written in Python 3.5 with the Anaconda environment - the packages used are outlined at the beginning of the file.
-
+This submissions containts the required files:  \textit{tictactoe.py, tictactoe.tex  \&tictactoe.pdf}. The starter code \textit{tictactoe.py} provided in the project description is used.  Code was written in Python 3.5 with the Anaconda environment. PyTorch 0.3+ is used. 
 
 
 \end{homeworkProblem}
@@ -229,7 +229,14 @@ This submissions containts the required files:  \textit{digits.py, faces.py, dee
 
 \noindent \textit{Environment Description}
 
-The \textit{Environment} class provides a framework for the Tic-Tac-Toe layout.  The grid is represented by a $3 \times 3$ numpy array.  The attributes \textit{turn} and \textit{done} represent whose turn it is during the game (e.g. Player 1 vs. Player 2) and whether or not the game has finished, respectively.  The \textit{step()} function provides a method for a user/agent to input a move into the gameboard, taking in \textit{action} as it's parameter (e.g. where to place an X/O on the board, represented by a number from 0-9).  The \textit{render()} method shows the current state of the board.  The following code was written to test both functions:
+The starter code \textit{tictactoe.py} provides an \textit{Environment} class, which is a framework for the Tic-Tac-Toe game.  The tictactoe grid is initalized at each new game with \textit{self.grid=np.array([0]*9)}; this is an numpy array of length 9 representing the flattened 3 by 3 grid.  The attribute \textit{turn} represents whose turn it is during the game (e.g. Player 1 vs. Player 2); when the grid is rendered 1 represents 'x' and 2 represents 'o'. After a valid play that does not end the game, the players change from 1 to 2 or vice versa. 
+\\
+
+The frozenset \textit{win\_set} contains 8 tuples of length 3. Each typle contains a winning combination of plays (indices on the grid). If the same label (except for 0) is contained at all three indices, that player wins the game.  This is checked in \textit {check\_win(self)}. The attribute \textit{done} determines if the current game is finished. The game is finished if a player wins or if the grid is full - if the game is finished \textit{self.done=True}.
+\\
+
+The \textit{step()} function provides a method for a user/agent to input a move into the gameboard, taking in \textit{action} as it's parameter (e.g. where to place an X/O on the board, represented by a number from 0-9).  The \textit{render()} method shows the current state of the board.  The following code was written to test both functions:
+\\  
 
 \begin{lstlisting}
 if __name__ == '__main__':
@@ -292,7 +299,7 @@ class Policy(nn.Module):
 
 \item For a given position on the board, the select\_action function will return the probabilities that the agent should take with respect to the available moves - in this case, either X, O or no action.  As there are 9 total positions on the board, therefore, there are $3x3x3 = 27$ total vector dimensions (e.g. 3 moves per position $\times$ 3 positions per row $\times$ 3 rows per board).
 
-\item The value in each of the 9-output dimensions refer to the probabilities of the action that the agent will take - that is to say, the agent will pick the action status based on the highest value obtained from the neural network.  The policy is stochastic as the agent will pick a move based on the current state of the board.
+\item The values in each of the 9-output dimensions refer to the probabilities of the action that the agent will take -  the agent will pick the action status based on the highest value obtained from the neural network.  The policy is stochastic as the agent will pick a move based on the current state of the board.
 \end{enumerate}
 \end{homeworkProblem}
 
@@ -305,7 +312,7 @@ class Policy(nn.Module):
 %----------------------------------------------------------------------------------------
 
 \begin{homeworkProblem}
-\noindent \textit{Policyt Gradient}
+\noindent \textit{Policy Gradient}
 
 \begin{enumerate}[label=(\Alph*)]
 \item The implementation for the \textit{compute\_returns} function is located below.
@@ -327,7 +334,9 @@ def compute_returns(rewards, gamma=1.0):
 
 \end{lstlisting}
 
-\item 
+\item The backwards pass to update weights is computed when the entire episode is complete. The weights cannot be updated in the middle of an episode because the final state (win/lose/tie) which determines the reward is not known until the end of the episode. 
+
+
 \end{enumerate}
 \end{homeworkProblem}
 \clearpage
@@ -353,9 +362,15 @@ def get_reward(status):
 
 \end{lstlisting}
 
-\item The intention behind our choices was to significantly penalize making an invalid move so that the agent learned to stop making invalid moves earlier and consider only valid moves.  The only positive reward that was implemented was for winning a match.  Each of the other statuses had a zero reward.  The intuition here was to not penalize the agent for playing a move that was valid, but also, not penalize the agent for playing moves that resulted in ties or losses, only rewarding the agent for winning moves.
-\end{enumerate}
+\item A large penalty (-100) was chosen to signficantly penalize invalid moves to ensure that the agent learned to stop making invalid moves earlier and consider only valid moves.  Per the instructions, and in order for the agent to play the game 'correctly' we chose a penalty (by some trial and error) that ensured the agent played fewer than 3\% invalid moves.  
+\\
 
+The only positive reward that was implemented was for winning a match. Each of the other statuses had a zero reward. The intuition here was to not penalize the agent for playing a move that was valid, but also, not penalize the agent for playing moves that resulted in ties or losses, only rewarding the agent for winning moves.
+\\
+
+ It was observed that by adding rewards for a tie or a negative reward for a loss, the agent was drawn to more ties and fewer wins. This reward system, by trial and error, resulted in very few invalid moves and a win rate of ~90\% by 100,000 episodes. It can be noted that another combination of rewards might achieve similar or better results; the reward system could also depend on what value is placed on each outcome - for example; is the objective to maximize the number of wins, or minimize the number of losses even if there are more ties. 
+
+\end{enumerate}
 \end{homeworkProblem}
 \clearpage
 %----------------------------------------------------------------------------------------
@@ -367,16 +382,77 @@ def get_reward(status):
 \noindent \textit{Training}
 
 \begin{enumerate}[label=(\Alph*)]
-\item The learning curve for the agent is shown in the following figure.  The number of neurons in the hidden layer was modified to 18 instead of the default 64 from the starter code.
+\item The learning curve for the agent is shown in the following figure.  The number of neurons in the hidden layer was modified to 9 instead of the default 64 from the starter code.
  \begin{center}
 \begin{figure}[!ht]\centering
 \includegraphics[scale=0.75]{part5.png}
 \caption{Learning curve - average return vs. episode number}
 \end{figure}
 \end{center}
-\item  The effect of number of units in the hiddle layer vs. performance of the agent was measured by both increasing and decreasing the number of units and measuring the win rate of the trained agent at 100,000 episodes.
-\item  Based on the choice of rewards and number of units in the hidden layer, we observed that agent stopped playing invalid moves at approximately episode 25000.  To obtain this answer, we fetched the environment status every time an agent played an invalid move and incremented the total number of invalid moves by 1.  The total numnber of invalid moves was then output to the console.
-\item After running the agent for 100000 episodes, we were able to obtain a win rate of approximately 80-85\% (the reason for a range was due to the fact that an issue with seeding any random functionality was not resolved in time for this report).  The loss rate fluctuated between 15-20\% and the tie rate was the remaining percentage of games played.  The following output displays the first 5 games played by our agent, given a set of policy weights:
+\item  The effect of number of units in the hiddle layer vs. performance of the agent was measured by both increasing and decreasing the number of units and measuring the win rate of the trained agent at 100,000 episodes. The performance was tested with numerous numbers of hidden neurons. The performance with 9, 16, and 64 hidden neurons is shown on the following page.  It can be seen that 9 hidden neurons results in both the best win rate of the trained epsiode at 100,000 episodes and the highest stability (less fluctuation). 
+
+\clearpage
+
+\begin{figure*}[!ht]
+\begin{subfigure}{.35\textwidth}\centering
+\includegraphics[scale=0.25]{part6a.png}
+\caption{9 hidden neurons \\ 100 000 Episodes}
+\label{}
+\end{subfigure}
+\begin{subfigure}{.35\textwidth}\centering
+\includegraphics[scale=0.25]{part6c.png}
+\caption{18 hidden neurons \\100 000 Episodes}
+\label{}
+\end{subfigure}%
+\begin{subfigure}{.35\textwidth}\centering
+\includegraphics[scale=0.25]{part6e.png}
+\caption{64 hidden neurons \\ 100 000 Episodes}
+\label{}
+\end{subfigure}
+\begin{subfigure}{.35\textwidth}\centering
+\includegraphics[scale=0.25]{part6b.png}
+\caption{9 hidden neurons\\ Final 10 000 Episodes}
+\label{}
+\end{subfigure}%
+\begin{subfigure}{.35\textwidth}\centering
+\includegraphics[scale=0.25]{part6d.png}
+\caption{18 hidden neurons \\ Final 10 000 Episodes}
+\label{}
+\end{subfigure}
+\begin{subfigure}{.35\textwidth}\centering
+\includegraphics[scale=0.25]{part6f.png}
+\caption{64 hidden neurons \\ Final 10 000 Episodes}
+\label{}%
+\end{subfigure}
+\caption{Tic-Tac-Toe agent performance with number of hidden neurons (all episodes on top and last 10000 below}
+\label{fig:pcs}
+\end{figure*}
+
+\item  Based on the choice of rewards and number of units in the hidden layer, we observed that agent stopped playing invalid moves at approximately episode 25000.  To obtain this answer, we fetched the environment status every time an agent played an invalid move and incremented the total number of invalid moves by 1.  The total numnber of invalid moves was then output to the console. Some examples of the output are shown below. 
+
+\begin{lstlisting}
+
+python tictactoe.py 30000
+Number of games won: 90
+Number of games tied: 1
+Number of games lost: 9
+Number of invalid moves: 1
+
+python tictactoe.py 50000
+Number of games won: 88
+Number of games tied: 1
+Number of games lost: 11
+Number of invalid moves: 0
+
+python tictactoe.py 99000
+Number of games won: 90
+Number of games tied: 1
+Number of games lost: 9
+Number of invalid moves: 0
+
+\end{lstlisting}
+
+\item After running the agent for 100000 episodes, we were able to obtain a win rate of approximately 88-90\% (the reason for a range was due to the fact that an issue with seeding any random functionality was not resolved in time for this report).  The loss rate fluctuated between 15-20\% and the tie rate was the remaining percentage of games played.  The following output displays the first 5 games played by our agent, given a set of policy weights:
 \begin{lstlisting}
 # Game 1
 xo.
@@ -418,11 +494,16 @@ xo.
 \begin{homeworkProblem}
 \noindent \textit{Win Rate over Episodes}
 
-The following graph outlines the win, lose, and tie rates for the agent vs. episode.
+The following graphs outlines the win, lose, and tie rates for the agent vs. episode for 9 hidden neurons (the chosen hyperparameter). 
 
 \begin{figure}[!ht]\centering
-\includegraphics[scale=0.75]{part6.png}
-\caption{Win/Lose/Tie rates vs. episode}
+\includegraphics[scale=0.4]{part6a.png}
+\caption{Win/Lose/Tie rates vs. episode - 100 000 Episodes}
+\end{figure}
+
+\begin{figure}[!ht]\centering
+\includegraphics[scale=0.4]{part6b.png}
+\caption{Win/Lose/Tie rates vs. episode - Final 10 000 Episodes}
 \end{figure}
 
 Given that a random agent playing the game results in a win rate of approximately 60\%, it appears that the agent is learning effectively enough to net a win rate that is higher than if a random agent was playing the game.  The three lines in the figure however, are quite noisy (e.g. they do not follow a smooth pattern), perhaps indicating that the hyperparameters could be tuned some more.
@@ -464,3 +545,6 @@ TO DO
 \clearpage
 
 \end{document}
+
+
+
