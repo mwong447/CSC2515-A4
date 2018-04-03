@@ -214,7 +214,7 @@
 
 \noindent \textit{Introductory information and readme instructions}
 
-This submissions containts the required files:  \textit{tictactoe.py, tictactoe.tex  \&tictactoe.pdf}. The starter code \textit{tictactoe.py} provided in the project description is used.  Code was written in Python 3.5 with the Anaconda environment. PyTorch 0.3+ is used. 
+This submissions contains the required files:  \textit{tictactoe.py, tictactoe.tex  \&tictactoe.pdf}. The starter code \textit{tictactoe.py} provided in the project description is used.  Code was written in Python 3.5 with the Anaconda environment. PyTorch 0.31.post2 is used. 
 
 
 \end{homeworkProblem}
@@ -232,7 +232,7 @@ This submissions containts the required files:  \textit{tictactoe.py, tictactoe.
 The starter code \textit{tictactoe.py} provides an \textit{Environment} class, which is a framework for the Tic-Tac-Toe game.  The tictactoe grid is initalized at each new game with \textit{self.grid=np.array([0]*9)}; this is an numpy array of length 9 representing the flattened 3 by 3 grid.  The attribute \textit{turn} represents whose turn it is during the game (e.g. Player 1 vs. Player 2); when the grid is rendered 1 represents 'x' and 2 represents 'o'. After a valid play that does not end the game, the players change from 1 to 2 or vice versa. 
 \\
 
-The frozenset \textit{win\_set} contains 8 tuples of length 3. Each typle contains a winning combination of plays (indices on the grid). If the same label (except for 0) is contained at all three indices, that player wins the game.  This is checked in \textit {check\_win(self)}. The attribute \textit{done} determines if the current game is finished. The game is finished if a player wins or if the grid is full - if the game is finished \textit{self.done=True}.
+The frozenset \textit{win\_set} contains 8 tuples of length 3. Each tuple contains a winning combination of plays (indices on the grid). If the same label (except for 0) is contained at all three indices, that player wins the game.  This is checked in \textit {check\_win(self)}. The attribute \textit{done} determines if the current game is finished. The game is finished if a player wins or if the grid is full - if the game is finished \textit{self.done=True}.
 \\
 
 The \textit{step()} function provides a method for a user/agent to input a move into the gameboard, taking in \textit{action} as it's parameter (e.g. where to place an X/O on the board, represented by a number from 0-9).  The \textit{render()} method shows the current state of the board.  The following code was written to test both functions:
@@ -299,7 +299,7 @@ class Policy(nn.Module):
 
 \item For a given position on the board, the select\_action function will return the probabilities that the agent should take with respect to the available moves - in this case, either X, O or no action.  As there are 9 total positions on the board, therefore, there are $3x3x3 = 27$ total vector dimensions (e.g. 3 moves per position $\times$ 3 positions per row $\times$ 3 rows per board).
 
-\item Each value in the 9 dimensional output is a probability value representing the best action to take on the board (e.g. $3\times3$ actions) - i.e. the higher the number, the higher the probability of that action being the best action.  This policy is stochastic as it outputs a probability distribution of the best moves based on the current status of the board and not deterministic (e.g. there is no one best move for the current board status).
+\item Each value in the 9 dimensional output is a probability value representing the best action to take on the board (e.g. $3\times3$ actions) - i.e. the higher the number, the higher the probability of that action being the best action.  The output of the policy is stochastic as it outputs a probability distribution of the best moves based on the current status of the board and not deterministic (e.g. there is no one best move for the current board status).
 \end{enumerate}
 \end{homeworkProblem}
 
@@ -334,7 +334,7 @@ def compute_returns(rewards, gamma=1.0):
 
 \end{lstlisting}
 
-\item The backwards pass to update weights is computed when the entire episode is complete. The weights cannot be updated in the middle of an episode because the final state (win/lose/tie) which determines the reward is not known until the end of the episode. 
+\item The backwards pass to update weights is computed when the entire episode is complete. The weights cannot be updated in the middle of an episode because the final win/lose/tie state (that determines the reward) is not known until the end of the episode. 
 
 
 \end{enumerate}
@@ -368,7 +368,7 @@ def get_reward(status):
 The only positive reward that was implemented was for winning a match. Each of the other statuses had a zero reward. The intuition here was to not penalize the agent for playing a move that was valid, but also, not penalize the agent for playing moves that resulted in ties or losses, only rewarding the agent for winning moves.
 \\
 
- It was observed that by adding rewards for a tie or a negative reward for a loss, the agent was drawn to more ties and fewer wins. This reward system, by trial and error, resulted in very few invalid moves and a win rate of ~90\% by 100,000 episodes. It can be noted that another combination of rewards might achieve similar or better results; the reward system could also depend on what value is placed on each outcome - for example; is the objective to maximize the number of wins, or minimize the number of losses even if there are more ties. 
+It was observed that by adding rewards for a tie or a negative reward for a loss, the agent was drawn to more ties and fewer wins. This reward system, by trial and error, resulted in very few invalid moves and a win rate of ~90\% by 100,000 episodes. It can be noted that another combination of rewards might achieve similar or better results; the reward system could also depend on what value is placed on each outcome - for example; is the objective to maximize the number of wins, or minimize the number of losses even if there are more ties. 
 
 \end{enumerate}
 \end{homeworkProblem}
